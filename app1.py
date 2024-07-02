@@ -77,15 +77,9 @@ def main():
 
     # Display pair plot of selected features
     st.subheader('Pair Plot of Selected Features')
-    columns_to_plot = ['MDVP:Jitter(%)',	'MDVP:Jitter(Abs)',	'MDVP:RAP',	'MDVP:PPQ',	'Jitter:DDP',	'MDVP:Shimmer', 'status']  # Replace with your columns
-    # sns.pairplot(pdata[columns_to_plot], hue='status', diag_kind='kde')
-    if st.checkbox("Seaborn Pairplot",value=True):
-    	import matplotlib
-    	import matplotlib.pyplot as plt
-    	import seaborn as sns
-    	fig = plt.figure()
-    	sns.pairplot(columns_to_plot, hue="status") 
-    	st.pyplot(fig)
+    columns_to_plot = ['MDVP-Jitter(%)',	'MDVP-Jitter(Abs)',	'MDVP-RAP',	'MDVP-PPQ',	'Jitter-DDP',	'MDVP-Shimmer', 'status']  # Replace with your columns
+    sns.pairplot(pdata[columns_to_plot], hue='status', diag_kind='kde')
+    
     
 
     # Display confusion matrix
