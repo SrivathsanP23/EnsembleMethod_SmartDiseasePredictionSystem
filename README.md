@@ -1,5 +1,9 @@
 https://smartdiseasepredictionsystem.streamlit.app/
 
+
+![image](https://github.com/SrivathsanP23/EnsembleMethod_SmartDiseasePredictionSystem/assets/156175839/a0f624c0-b99a-493c-8975-7622d2e3a60c)
+
+
 ![image](https://github.com/SrivathsanP23/EnsembleMethod_SmartDiseasePredictionSystem/assets/156175839/ec0defcf-6f78-46f6-88c7-c337065a0096)
 
 
