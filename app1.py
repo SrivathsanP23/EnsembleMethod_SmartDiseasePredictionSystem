@@ -84,7 +84,7 @@ def main():
     	import matplotlib.pyplot as plt
     	import seaborn as sns
     	fig = plt.figure()
-    	sns.pairplot(columns_to_plot, hue="status",diag_kind='kde') 
+    	sns.pairplot(columns_to_plot, hue="status") 
     	st.pyplot(fig)
     
 
