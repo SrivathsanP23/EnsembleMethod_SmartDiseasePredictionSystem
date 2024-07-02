@@ -77,9 +77,9 @@ def main():
 
     # Display pair plot of selected features
     st.subheader('Pair Plot of Selected Features')
-    columns_to_plot = ['MDVP-Fo(Hz)', 'MDVP-Fhi(Hz)', 'MDVP-Flo(Hz)', 'status']
-    pair_plot = sns.pairplot(pdata[columns_to_plot], hue='status', diag_kind='kde')
-    st.pyplot(pair_plot.fig)
+    columns_to_plot = ['MDVP:Jitter(%)',	'MDVP:Jitter(Abs)',	'MDVP:RAP',	'MDVP:PPQ',	'Jitter:DDP',	'MDVP:Shimmer', 'status']  # Replace with your columns
+    sns.pairplot(pdata[columns_to_plot], hue='status', diag_kind='kde')
+    st.pyplot(columns_to_plot.fig)
 
     # Display confusion matrix
     st.subheader('Confusion Matrix')
