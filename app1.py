@@ -7,7 +7,7 @@ from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 import pickle
 import streamlit as st
-import seaborn as sns
+# import seaborn as sns
 # import matplotlib.pyplot as plt
 
 # Load the dataset
@@ -78,7 +78,7 @@ def main():
     # Display pair plot of selected features
     st.subheader('Pair Plot of Selected Features')
     columns_to_plot = ['MDVP-Jitter(%)',	'MDVP-Jitter(Abs)',	'MDVP-RAP',	'MDVP-PPQ',	'Jitter-DDP',	'MDVP-Shimmer', 'status']  # Replace with your columns
-    sns.pairplot(pdata[columns_to_plot], hue='status', diag_kind='kde')
+    st.pairplot(pdata[columns_to_plot], hue='status', diag_kind='kde')
     
     
 
