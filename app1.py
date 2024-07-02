@@ -87,8 +87,8 @@ def main():
         color=alt.Color('status:N', legend=alt.Legend(title="Status")),
         tooltip=['measurement', 'value', 'status']
     ).facet(
-        row='measurement:N',
-        columns=3
+        column='measurement:N',
+        row=3
     ).interactive()
 
     st.altair_chart(chart, use_container_width=True)
