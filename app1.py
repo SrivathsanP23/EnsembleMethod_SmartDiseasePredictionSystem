@@ -5,10 +5,8 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
-import pickle
 import streamlit as st
-# import seaborn as sns
-# import matplotlib.pyplot as plt
+import altair as alt
 
 # Load the dataset
 pdata = pd.read_csv('parkinsons1.csv')
@@ -54,7 +52,7 @@ def main():
     for feature in X.columns:
         min_val = X[feature].min()
         max_val = X[feature].max()
-        val = st.sidebar.slider(f"{feature} ", min_value=min_val, max_value=max_val)
+        val = st.sidebar.slider(f"{feature} ", min_value=float(min_val), max_value=float(max_val))
         input_data.append(val)
 
     # Make prediction
@@ -77,10 +75,23 @@ def main():
 
     # Display pair plot of selected features
     st.subheader('Pair Plot of Selected Features')
-    columns_to_plot = ['MDVP-Jitter(%)',	'MDVP-Jitter(Abs)',	'MDVP-RAP',	'MDVP-PPQ',	'Jitter-DDP',	'MDVP-Shimmer', 'status']  # Replace with your columns
-    st.pairplot(pdata[columns_to_plot], hue='status', diag_kind='kde')
-    
-    
+    columns_to_plot = ['MDVP:Jitter(%)', 'MDVP:Jitter(Abs)', 'MDVP:RAP', 'MDVP:PPQ', 'Jitter:DDP', 'MDVP:Shimmer', 'status']
+
+    # Melting the dataframe for easier plotting with Altair
+    melted_df = pd.melt(pdata[columns_to_plot], id_vars=['status'], value_vars=columns_to_plot[:-1], var_name='measurement', value_name='value')
+
+    # Create a pairplot using Altair
+    chart = alt.Chart(melted_df).mark_point().encode(
+        x=alt.X('measurement:N', title='Measurement'),
+        y=alt.Y('value:Q', title='Value'),
+        color=alt.Color('status:N', legend=alt.Legend(title="Status")),
+        tooltip=['measurement', 'value', 'status']
+    ).facet(
+        row='measurement:N',
+        columns=3
+    ).interactive()
+
+    st.altair_chart(chart, use_container_width=True)
 
     # Display confusion matrix
     st.subheader('Confusion Matrix')
