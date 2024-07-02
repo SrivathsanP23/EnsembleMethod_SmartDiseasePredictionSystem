@@ -88,7 +88,6 @@ def main():
         tooltip=['measurement', 'value', 'status']
     ).facet(
         column='measurement:N',
-        row=3
     ).interactive()
 
     st.altair_chart(chart, use_container_width=True)
