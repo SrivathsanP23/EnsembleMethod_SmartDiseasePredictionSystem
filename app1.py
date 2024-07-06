@@ -52,7 +52,7 @@ def main():
     for feature in X.columns:
         min_val = X[feature].min()
         max_val = X[feature].max()
-        val = st.sidebar.slider(f"{feature} ", min_value=double(min_val), max_value=float(max_val))
+        val = st.sidebar.slider(f"{feature} ", min_value=float(min_val), max_value=float(max_val))
         input_data.append(val)
 
     # Make prediction
