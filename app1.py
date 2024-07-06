@@ -66,7 +66,7 @@ def main():
     # Display accuracy
     st.subheader('Accuracy of Ensemble Model')
     acc = calculate_accuracy()
-    st.write(f'Accuracy: {acc:.2f}')
+    st.write(f'Accuracy: {acc*100:.2f}%')
 
     # Display distribution of target variable
     st.subheader('Distribution of Target Variable')
