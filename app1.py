@@ -52,7 +52,7 @@ def main():
     for feature in X.columns:
         min_val = X[feature].min()
         max_val = X[feature].max()
-        val = st.sidebar.slider(f"{feature} ", min_value=float(min_val), max_value=float(max_val))
+        val = st.sidebar.slider(f"{feature} ", min_value=float(min_val), max_value=int(max_val))
         input_data.append(val)
 
     # Make prediction
@@ -66,7 +66,7 @@ def main():
     # Display accuracy
     st.subheader('Accuracy of Ensemble Model')
     acc = calculate_accuracy()
-    st.write(f'Accuracy: {acc*100:.4f}%')
+    st.write(f'Accuracy: {acc*100:.2f}%')
 
     # Display distribution of target variable
     st.subheader('Distribution of Target Variable')
@@ -75,7 +75,7 @@ def main():
 
     # Display pair plot of selected features
     st.subheader('Pair Plot of Selected Features')
-    columns_to_plot = ['MDVP-Jitter(%)', 'MDVP-Jitter(Abs)', 'MDVP-RAP', 'MDVP-PPQ', 'Jitter-DDP', 'MDVP-Shimmer', 'status']
+    columns_to_plot = ['MDVP-Jitter(%)', 'spread1','spread2'. 'MDVP-RAP', 'MDVP-PPQ', 'Jitter-DDP', 'MDVP-Shimmer', 'status']
 
     # Melting the dataframe for easier plotting with Altair
     melted_df = pd.melt(pdata[columns_to_plot], id_vars=['status'], value_vars=columns_to_plot[:-1], var_name='measurement', value_name='value')
