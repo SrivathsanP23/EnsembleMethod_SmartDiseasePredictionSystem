@@ -1,5 +1,6 @@
-https://smartdiseasepredictionsystem.streamlit.app/
-
+<h1>How to Run</h1>
+<hr>
+<p>streamlit run app.py</p>
 
 ![image](https://github.com/SrivathsanP23/EnsembleMethod_SmartDiseasePredictionSystem/assets/156175839/a0f624c0-b99a-493c-8975-7622d2e3a60c)
 
