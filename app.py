@@ -8,6 +8,7 @@ from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from imblearn.over_sampling import SMOTE
 import streamlit as st
 import altair as alt
+import pickle  # Import pickle
 
 # Load the dataset
 pdata = pd.read_csv('parkinsons1.csv')
@@ -25,15 +26,20 @@ smote = SMOTE(random_state=42)
 # Apply SMOTE to the training data
 X_train_smote, Y_train_smote = smote.fit_resample(X_train, Y_train)
 
+# Load the trained Voting Classifier model from a pickle file
+with open('E:/Guvi DS/SmartDiseaseEnsemble/smartdiseaseprediction_ensemble.sav', 'rb') as file:
+    voting_clf = pickle.load(file)
+
+# If you want to retrain, comment the above lines and uncomment below:
 # Initialize models with best parameters
 log_reg = LogisticRegression(C=10, max_iter=10000, class_weight='balanced')
 svm = SVC(C=0.1, probability=True, class_weight='balanced')
 rf = RandomForestClassifier(max_depth=10, n_estimators=100, class_weight='balanced')
 
-# Create a Voting Classifier
+#Create a Voting Classifier
 voting_clf = VotingClassifier(estimators=[('lr', log_reg), ('svc', svm), ('rf', rf)], voting='soft')
 
-# Train the model using the SMOTE data
+#Train the model using the SMOTE data
 voting_clf.fit(X_train_smote, Y_train_smote)
 
 # Function to predict and interpret results
