@@ -27,7 +27,7 @@ smote = SMOTE(random_state=42)
 X_train_smote, Y_train_smote = smote.fit_resample(X_train, Y_train)
 
 # Load the trained Voting Classifier model from a pickle file
-with open('E:/Guvi DS/SmartDiseaseEnsemble/smartdiseaseprediction_ensemble.sav', 'rb') as file:
+with open('smartdiseaseprediction_ensemble.sav', 'rb') as file:
     voting_clf = pickle.load(file)
 
 # If you want to retrain, comment the above lines and uncomment below:
