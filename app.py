@@ -7,24 +7,35 @@ from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from imblearn.over_sampling import SMOTE
 import streamlit as st
+from sklearn.preprocessing import StandardScaler
 import altair as alt
+from sklearn.metrics import r2_score
 import pickle  # Import pickle
 
 # Load the dataset
-pdata = pd.read_csv('parkinsons1.csv')
+pdata = pd.read_csv('parkinsons.csv')
 
 # Separate features and target
-X = pdata.drop(columns=['name', 'status'], axis=1)
+#separating feature and target
+X = pdata[['PPE', 'spread1', 'MDVP:APQ', 'MDVP:Fhi(Hz)', 'MDVP:Fo(Hz)',
+           'Jitter:DDP', 'spread2', 'MDVP:Flo(Hz)', 'MDVP:Shimmer',
+           'MDVP:RAP', 'D2', 'Shimmer:APQ5', 'MDVP:Shimmer(dB)',
+           'MDVP:Jitter(Abs)', 'MDVP:Jitter(%)', 'MDVP:PPQ', 'DFA',
+           'Shimmer:APQ3', 'HNR', 'Shimmer:DDA', 'NHR', 'RPDE']]
+
 Y = pdata['status']
 
 # Train-test split
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 
-# Initialize SMOTE
+# Scale the training and testing features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Apply SMOTE to the scaled training data
 smote = SMOTE(random_state=42)
-
-# Apply SMOTE to the training data
-X_train_smote, Y_train_smote = smote.fit_resample(X_train, Y_train)
+X_train_smote, y_train_smote = smote.fit_resample(X_train_scaled, y_train)
 
 # Load the trained Voting Classifier model from a pickle file
 with open('smartdiseaseprediction_ensemble.sav', 'rb') as file:
@@ -32,15 +43,16 @@ with open('smartdiseaseprediction_ensemble.sav', 'rb') as file:
 
 # If you want to retrain, comment the above lines and uncomment below:
 # Initialize models with best parameters
-log_reg = LogisticRegression(C=10, max_iter=10000, class_weight='balanced')
-svm = SVC(C=0.1, probability=True, class_weight='balanced')
+# Create individual classifiers with best parameters and class weights
+log_reg = LogisticRegression(C=0.1, class_weight='balanced')
+svm = SVC(C=10, probability=True, class_weight='balanced')
 rf = RandomForestClassifier(max_depth=10, n_estimators=100, class_weight='balanced')
 
-#Create a Voting Classifier
-voting_clf = VotingClassifier(estimators=[('lr', log_reg), ('svc', svm), ('rf', rf)], voting='soft')
 
+# Create a voting classifier with best parameters and weights
+voting_clf = VotingClassifier(estimators=[('lr', log_reg), ('svc', svm), ('rf', rf)], voting='soft', weights=[1, 2, 1])
 #Train the model using the SMOTE data
-voting_clf.fit(X_train_smote, Y_train_smote)
+voting_clf.fit(X_train_smote, y_train_smote)
 
 # Function to predict and interpret results
 def predict(input_data):
@@ -51,13 +63,19 @@ def predict(input_data):
 
 # Function to calculate accuracy
 def calculate_accuracy():
-    Y_pred = voting_clf.predict(X_test)
-    acc = accuracy_score(Y_test, Y_pred)
+    Y_pred = voting_clf.predict(X_test_scaled)
+    acc = accuracy_score(y_test, Y_pred)
+    
     return acc
+
+def calculate_r2():
+    Y_pred = voting_clf.predict(X_test_scaled)
+    r2=r2_score(y_test,Y_pred)
+    return r2
 
 def calculate_training_acc():
     Y_predd = voting_clf.predict(X_train_smote)
-    train_acc = accuracy_score(Y_train_smote, Y_predd)
+    train_acc = accuracy_score(y_train_smote, Y_predd)
     return train_acc
 
 # Streamlit interface
@@ -84,18 +102,21 @@ def main():
     # Display accuracy
     st.subheader('Accuracy of Ensemble Model')
     acc = calculate_accuracy()
+    r2 = calculate_r2()
     st.write(f'Testing Accuracy: {acc:.3f}')
     train_acc = calculate_training_acc()
     st.write(f'Training Accuracy: {train_acc:.2f}')
-
+    
+    st.write(f'r2 score: {r2:.4f}')
     # Display distribution of target variable
     st.subheader('Distribution of Target Variable')
     st.write(pdata['status'].value_counts())
     st.bar_chart(pdata['status'].value_counts())
 
+
     # Display pair plot of selected features
     st.subheader('Pair Plot of Selected Features')
-    columns_to_plot = ['MDVP-Jitter(%)', 'MDVP-Jitter(Abs)', 'MDVP-RAP', 'MDVP-PPQ', 'Jitter-DDP', 'MDVP-Shimmer', 'status']
+    columns_to_plot = ['MDVP:Jitter(%)', 'MDVP:Jitter(Abs)', 'MDVP:RAP', 'MDVP:PPQ', 'Jitter:DDP', 'MDVP:Shimmer', 'status']
 
     # Melting the dataframe for easier plotting with Altair
     melted_df = pd.melt(pdata[columns_to_plot], id_vars=['status'], value_vars=columns_to_plot[:-1], var_name='measurement', value_name='value')
@@ -114,7 +135,7 @@ def main():
 
     # Display confusion matrix
     st.subheader('Confusion Matrix')
-    cm = confusion_matrix(Y_test, voting_clf.predict(X_test))
+    cm = confusion_matrix(y_test, voting_clf.predict(X_test_scaled))
     st.write(cm)
 
 if __name__ == '__main__':
