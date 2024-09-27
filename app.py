@@ -1,83 +1,68 @@
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix , r2_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
-from imblearn.over_sampling import SMOTE
 import streamlit as st
-from sklearn.preprocessing import StandardScaler
 import altair as alt
-from sklearn.metrics import r2_score
-import pickle  # Import pickle
+from sklearn.preprocessing import StandardScaler
+from imblearn.over_sampling import SMOTE
+import pickle
 
 # Load the dataset
 pdata = pd.read_csv('parkinsons.csv')
 
 # Separate features and target
-#separating feature and target
-X = pdata[['PPE', 'spread1', 'MDVP:APQ', 'MDVP:Fhi(Hz)', 'MDVP:Fo(Hz)',
-           'Jitter:DDP', 'spread2', 'MDVP:Flo(Hz)', 'MDVP:Shimmer',
-           'MDVP:RAP', 'D2', 'Shimmer:APQ5', 'MDVP:Shimmer(dB)',
-           'MDVP:Jitter(Abs)', 'MDVP:Jitter(%)', 'MDVP:PPQ', 'DFA',
-           'Shimmer:APQ3', 'HNR', 'Shimmer:DDA', 'NHR', 'RPDE']]
-
+X = pdata.drop(columns=['name', 'status'], axis=1)
 Y = pdata['status']
 
 # Train-test split
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
-
-# Scale the training and testing features
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=40)
 scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+scaler.fit(X_train)
+X_train_scale = scaler.transform(X_train)
+X_test_scale = scaler.transform(X_test)
 
 # Apply SMOTE to the scaled training data
 smote = SMOTE(random_state=42)
-X_train_smote, y_train_smote = smote.fit_resample(X_train_scaled, y_train)
+X_train_smote, y_train_smote = smote.fit_resample(X_train_scale, Y_train)
 
-# Load the trained Voting Classifier model from a pickle file
-with open('smartdiseaseprediction_ensemble.sav', 'rb') as file:
-    voting_clf = pickle.load(file)
-
-# If you want to retrain, comment the above lines and uncomment below:
-# Initialize models with best parameters
+# Initialize models
 # Create individual classifiers with best parameters and class weights
 log_reg = LogisticRegression(C=0.1, class_weight='balanced')
 svm = SVC(C=10, probability=True, class_weight='balanced')
 rf = RandomForestClassifier(max_depth=10, n_estimators=100, class_weight='balanced')
 
+# Create a Voting Classifier
+voting_clf = VotingClassifier(estimators=[('lr', log_reg), ('svc', svm), ('rf', rf)], voting='soft',weights=[1,2,1])
 
-# Create a voting classifier with best parameters and weights
-voting_clf = VotingClassifier(estimators=[('lr', log_reg), ('svc', svm), ('rf', rf)], voting='soft', weights=[1, 2, 1])
-#Train the model using the SMOTE data
+# Train the model
 voting_clf.fit(X_train_smote, y_train_smote)
-
+#ense=pickle.load(open('smartdiseaseprediction_ensemble.sav','rb'))
 # Function to predict and interpret results
 def predict(input_data):
     input_data_as_numpy_array = np.asarray(input_data)
     input_data_reshaped = input_data_as_numpy_array.reshape(1, -1)
-    prediction = voting_clf.predict(input_data_reshaped)
+    std_data=scaler.transform(input_data_reshaped)
+    prediction = voting_clf.predict(std_data)
     return prediction[0]
 
 # Function to calculate accuracy
 def calculate_accuracy():
-    Y_pred = voting_clf.predict(X_test_scaled)
-    acc = accuracy_score(y_test, Y_pred)
-    
+    Y_pred = voting_clf.predict(X_test_scale)
+    acc = accuracy_score(Y_test, Y_pred)
     return acc
+def train_acc():
+    Y_pred = voting_clf.predict(X_train_smote)
+    tracc=accuracy_score(y_train_smote,Y_pred)
+    return tracc
 
-def calculate_r2():
-    Y_pred = voting_clf.predict(X_test_scaled)
-    r2=r2_score(y_test,Y_pred)
+def r_s():
+    test_pred = voting_clf.predict(X_test_scale)
+    r2=r2_score(Y_test,test_pred)
     return r2
-
-def calculate_training_acc():
-    Y_predd = voting_clf.predict(X_train_smote)
-    train_acc = accuracy_score(y_train_smote, Y_predd)
-    return train_acc
-
 # Streamlit interface
 def main():
     st.title('Parkinson\'s Disease Prediction')
@@ -93,6 +78,7 @@ def main():
 
     # Make prediction
     if st.sidebar.button('Predict'):
+        
         prediction = predict(input_data)
         if prediction == 0:
             st.success('Prediction: The person does not have Parkinson\'s Disease')
@@ -102,21 +88,20 @@ def main():
     # Display accuracy
     st.subheader('Accuracy of Ensemble Model')
     acc = calculate_accuracy()
-    r2 = calculate_r2()
-    st.write(f'Testing Accuracy: {acc:.3f}')
-    train_acc = calculate_training_acc()
-    st.write(f'Training Accuracy: {train_acc:.2f}')
+    st.write(f'Test Accuracy: {acc*100:.3f}%')
+    tracc=train_acc()
+    st.write(f'Train Accuracy:{tracc*100:.3f}%')
+    r2=r_s()
+    st.write(f'R2 score :{r2:.3f}')
     
-    st.write(f'r2 score: {r2:.4f}')
     # Display distribution of target variable
     st.subheader('Distribution of Target Variable')
     st.write(pdata['status'].value_counts())
     st.bar_chart(pdata['status'].value_counts())
 
-
     # Display pair plot of selected features
     st.subheader('Pair Plot of Selected Features')
-    columns_to_plot = ['MDVP:Jitter(%)', 'MDVP:Jitter(Abs)', 'MDVP:RAP', 'MDVP:PPQ', 'Jitter:DDP', 'MDVP:Shimmer', 'status']
+    columns_to_plot = ['MDVP:Fo(Hz)','MDVP:APQ', 'MDVP:Fhi(Hz)','spread1','spread2','MDVP:Shimmer(dB)',  'status']
 
     # Melting the dataframe for easier plotting with Altair
     melted_df = pd.melt(pdata[columns_to_plot], id_vars=['status'], value_vars=columns_to_plot[:-1], var_name='measurement', value_name='value')
@@ -132,10 +117,11 @@ def main():
     ).interactive()
 
     st.altair_chart(chart, use_container_width=True)
-
+    test_pred = voting_clf.predict(X_test_scale)
+    
     # Display confusion matrix
     st.subheader('Confusion Matrix')
-    cm = confusion_matrix(y_test, voting_clf.predict(X_test_scaled))
+    cm = confusion_matrix(Y_test,test_pred)
     st.write(cm)
 
 if __name__ == '__main__':
