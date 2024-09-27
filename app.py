@@ -60,8 +60,8 @@ def train_acc():
     return tracc
 
 def r_s():
-    test_pred = voting_clf.predict(X_test_scale)
-    r2=r2_score(Y_test,test_pred)
+    train_pred = voting_clf.predict(X_train_smote)
+    r2=r2_score(y_train_smote,train_pred)
     return r2
 # Streamlit interface
 def main():
