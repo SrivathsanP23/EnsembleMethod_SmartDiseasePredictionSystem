@@ -7,16 +7,12 @@
 
 <h2 style="center">Samples</h2>
 
-![image](https://github.com/user-attachments/assets/6f24b67c-6cbc-4d00-9dec-f8b09647e314)
+![image](https://github.com/user-attachments/assets/f308e2df-a911-48ef-b15a-9a38e89f2323)
 
+![image](https://github.com/user-attachments/assets/4d56245b-f64c-40db-89f6-863f22d2e1e4)
 
-![image](https://github.com/user-attachments/assets/cb4528b1-aa70-4e90-a35f-7b468c9da9d3)
+![image](https://github.com/user-attachments/assets/eea2d9bf-34a1-4ca4-b9c8-faa4045ffe75)
 
-
-![image](https://github.com/user-attachments/assets/fc08f7c7-217a-4304-b04d-be31cbde88ae)
-
-
-![image](https://github.com/user-attachments/assets/4b0cad6c-01b8-483e-a596-e7056fb79dd0)
-
+![image](https://github.com/user-attachments/assets/e5515d9a-bfa9-4a30-a3a2-103b2ebf6992)
 
 
